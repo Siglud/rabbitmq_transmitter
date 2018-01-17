@@ -51,9 +51,9 @@ public class RabbitConfig {
         return res;
     }
 
-    public boolean setEnv(String args, String env) {
+    public void setEnv(String args, String env) {
         if ((env == null || env.isEmpty()) && (args == null || args.isEmpty())) {
-            return false;
+            return;
         }
         if (env != null && !env.isEmpty()) {
             List<RabbitPair> config = parseArgs(env);
@@ -61,7 +61,7 @@ public class RabbitConfig {
                 LOGGER.info("system env setting seems error! your setting is ", env);
             } else {
                 pairs = config;
-                return true;
+                return;
             }
         }
         if (args != null && !args.isEmpty()) {
@@ -70,9 +70,7 @@ public class RabbitConfig {
                 LOGGER.info("args settings seems error! your setting is ", env);
             } else {
                 pairs = config;
-                return true;
             }
         }
-        return false;
     }
 }

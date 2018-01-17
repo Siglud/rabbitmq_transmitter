@@ -36,6 +36,11 @@ public class Main {
         catch (ParseException exp) {
             LOGGER.info("Unexpected args parse!", exp);
         }
+        try {
+            envFromParser = System.getenv().get("pair");
+        } catch (SecurityException| ClassCastException e) {
+            LOGGER.info("Unexpected env parse!", e);
+        }
         RabbitConfig config = RabbitConfig.getInstance();
         config.setEnv(argFromParser, envFromParser);
 
