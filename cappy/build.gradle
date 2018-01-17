@@ -1,0 +1,28 @@
+group 'com.kanjian'
+version '1.0-SHIRO'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'com.rabbitmq', name: 'amqp-client', version: '5.1.1'
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": 'com.kanjian.cappy.Main'
+    }
+
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
