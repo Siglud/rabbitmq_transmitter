@@ -25,8 +25,16 @@ public class Transmitter {
         this.config = config;
         ConnectionFactory connectionFactory = new ConnectionFactory();
         ConnectionFactory publishConnectionFactory = new ConnectionFactory();
+        connectionFactory.setNetworkRecoveryInterval(15000);
+        connectionFactory.setAutomaticRecoveryEnabled(true);
+        connectionFactory.setTopologyRecoveryEnabled(true);
+        connectionFactory.setConnectionTimeout(15000);
         connectionFactory.setRequestedHeartbeat(15);
         publishConnectionFactory.setRequestedHeartbeat(15);
+        publishConnectionFactory.setNetworkRecoveryInterval(15000);
+        publishConnectionFactory.setAutomaticRecoveryEnabled(true);
+        publishConnectionFactory.setTopologyRecoveryEnabled(true);
+        publishConnectionFactory.setConnectionTimeout(15000);
         try {
             connectionFactory.setUri(config.getInputUri());
         } catch (URISyntaxException | NoSuchAlgorithmException | KeyManagementException e) {
@@ -77,6 +85,7 @@ public class Transmitter {
                             try {
                                 publishChannel.basicPublish(config.getOutputExchange(), config.getOutputRoutingKey(), properties, body);
                                 publishChannel.waitForConfirms(PUBLISH_CONFIRM_TIME_OUT);
+                                LOGGER.info("deliver complete");
                                 break;
                             } catch (IOException | InterruptedException | TimeoutException e) {
                                 LOGGER.error("publish message encounter error!", e);
