@@ -27,13 +27,13 @@ public class Transmitter {
         ConnectionFactory publishConnectionFactory = new ConnectionFactory();
         connectionFactory.setNetworkRecoveryInterval(15000);
         connectionFactory.setAutomaticRecoveryEnabled(true);
-        connectionFactory.setTopologyRecoveryEnabled(true);
+        // connectionFactory.setTopologyRecoveryEnabled(true);
         connectionFactory.setConnectionTimeout(15000);
         connectionFactory.setRequestedHeartbeat(15);
         publishConnectionFactory.setRequestedHeartbeat(15);
         publishConnectionFactory.setNetworkRecoveryInterval(15000);
         publishConnectionFactory.setAutomaticRecoveryEnabled(true);
-        publishConnectionFactory.setTopologyRecoveryEnabled(true);
+        // publishConnectionFactory.setTopologyRecoveryEnabled(true);
         publishConnectionFactory.setConnectionTimeout(15000);
         try {
             connectionFactory.setUri(config.getInputUri());
