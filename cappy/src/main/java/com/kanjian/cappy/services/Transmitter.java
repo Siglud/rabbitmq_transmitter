@@ -3,6 +3,7 @@ package com.kanjian.cappy.services;
 import com.kanjian.cappy.error.RabbitMQError;
 import com.kanjian.cappy.model.RabbitPair;
 import com.rabbitmq.client.*;
+import com.rabbitmq.client.impl.DefaultExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +69,8 @@ public class Transmitter {
                 LOGGER.error("connection to rabbitMQ encounter error!", e);
             }
         }
+
+        connectionFactory.setRecoveryDelayHandler(recoveryAttempts -> Integer.MAX_VALUE);
 
     }
 
