@@ -3,7 +3,6 @@ package com.kanjian.cappy.services;
 import com.kanjian.cappy.error.RabbitMQError;
 import com.kanjian.cappy.model.RabbitPair;
 import com.rabbitmq.client.*;
-import com.rabbitmq.client.impl.DefaultExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,7 @@ import java.util.concurrent.TimeoutException;
 public class Transmitter {
     private static Logger LOGGER = LoggerFactory.getLogger(Transmitter.class.getName());
 
-    private static int PUBLISH_CONFIRM_TIME_OUT = 100000;
+    private static int PUBLISH_CONFIRM_TIME_OUT = 100_000;
 
     private RabbitPair config;
     private Channel channel;
@@ -39,13 +38,13 @@ public class Transmitter {
         try {
             connectionFactory.setUri(config.getInputUri());
         } catch (URISyntaxException | NoSuchAlgorithmException | KeyManagementException e) {
-            LOGGER.error("consumer uri setting error! uri is ", config.getInputUri(), e);
+            LOGGER.error("consumer uri setting error! uri is " + config.getInputUri(), e);
             throw new RabbitMQError("uri error ");
         }
         try {
             publishConnectionFactory.setUri(config.getOutputUri());
         } catch (NoSuchAlgorithmException | KeyManagementException | URISyntaxException e) {
-            LOGGER.error("publisher uri setting error! uri is ", config.getOutputUri(), e);
+            LOGGER.error("publisher uri setting error! uri is " + config.getOutputUri(), e);
             throw new RabbitMQError("uri error ");
         }
         while (true) {
@@ -84,30 +83,23 @@ public class Transmitter {
                                            AMQP.BasicProperties properties,
                                            byte[] body) {
                     try {
-                        while (true) {
-                            try {
-                                publishChannel.basicPublish(config.getOutputExchange(), config.getOutputRoutingKey(), properties, body);
-                                publishChannel.waitForConfirms(PUBLISH_CONFIRM_TIME_OUT);
-                                LOGGER.info("deliver complete");
-                                break;
-                            } catch (IOException | InterruptedException | TimeoutException e) {
-                                LOGGER.error("publish message encounter error!", e);
-                            }
-                        }
-                        while (true) {
-                            try {
-                                channel.basicAck(envelope.getDeliveryTag(), false);
-                                break;
-                            } catch (IOException e) {
-                                LOGGER.error("ACK message encounter error!", e);
-                            }
-                        }
+                        publishChannel.txSelect();
+                        publishChannel.basicPublish(config.getOutputExchange(), config.getOutputRoutingKey(), properties, body);
+                        publishChannel.waitForConfirms(PUBLISH_CONFIRM_TIME_OUT);
+                        LOGGER.info("deliver complete");
+                        channel.txCommit();
+                        channel.basicAck(envelope.getDeliveryTag(), false);
                     } catch (Exception e) {
                         LOGGER.error("something error!", e);
                         try {
-                            channel.basicNack(envelope.getDeliveryTag(), false, false);
+                            channel.basicNack(envelope.getDeliveryTag(), false, true);
                         } catch (IOException e1) {
                             LOGGER.error("nack fail!", e);
+                        }
+                        try {
+                            channel.txRollback();
+                        } catch (IOException e0) {
+                            LOGGER.error("rollback fail", e);
                         }
                     }
                 }
