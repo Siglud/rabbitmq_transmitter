@@ -85,7 +85,7 @@ public class Transmitter {
                     try {
                         publishChannel.txSelect();
                         publishChannel.basicPublish(config.getOutputExchange(), config.getOutputRoutingKey(), properties, body);
-                        publishChannel.waitForConfirms(PUBLISH_CONFIRM_TIME_OUT);
+                        // publishChannel.waitForConfirms(PUBLISH_CONFIRM_TIME_OUT);
                         LOGGER.info("deliver complete");
                         channel.txCommit();
                         channel.basicAck(envelope.getDeliveryTag(), false);
