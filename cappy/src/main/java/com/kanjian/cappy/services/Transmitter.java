@@ -63,6 +63,7 @@ public class Transmitter {
                 publishChannel = publishConn.createChannel();
                 publishChannel.basicQos(1);
                 publishChannel.confirmSelect();
+                // publishChannel.txSelect();
                 break;
             } catch (TimeoutException | IOException e) {
                 LOGGER.error("connection to rabbitMQ encounter error!", e);
@@ -83,11 +84,10 @@ public class Transmitter {
                                            AMQP.BasicProperties properties,
                                            byte[] body) {
                     try {
-                        publishChannel.txSelect();
                         publishChannel.basicPublish(config.getOutputExchange(), config.getOutputRoutingKey(), properties, body);
-                        // publishChannel.waitForConfirms(PUBLISH_CONFIRM_TIME_OUT);
+                        publishChannel.waitForConfirms(PUBLISH_CONFIRM_TIME_OUT);
                         LOGGER.info("deliver complete");
-                        channel.txCommit();
+                        // channel.txCommit();
                         channel.basicAck(envelope.getDeliveryTag(), false);
                     } catch (Exception e) {
                         LOGGER.error("something error!", e);
@@ -95,11 +95,6 @@ public class Transmitter {
                             channel.basicNack(envelope.getDeliveryTag(), false, true);
                         } catch (IOException e1) {
                             LOGGER.error("nack fail!", e);
-                        }
-                        try {
-                            channel.txRollback();
-                        } catch (IOException e0) {
-                            LOGGER.error("rollback fail", e);
                         }
                     }
                 }
